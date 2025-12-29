@@ -153,3 +153,18 @@ def run_rule_engine(df):
     alerts.extend(region_risk(df))
 
     return list(set(alerts))  # remove duplicates
+
+def compute_kpis(df):
+    total_sales = df["Sales"].sum()
+    total_profit = df["Profit"].sum()
+
+    top_products = (
+        df.groupby("Product")["Profit"]
+        .sum()
+        .sort_values(ascending=False)
+        .head(5)
+        .reset_index()
+    )
+
+    return total_sales, total_profit, top_products
+
