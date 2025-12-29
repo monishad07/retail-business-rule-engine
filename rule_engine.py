@@ -1,6 +1,3 @@
-
-
-
 import pandas as pd
 
 REQUIRED_COLUMNS = {"Date", "Product", "Profit", "Sales", "Discount", "Region"}
@@ -18,7 +15,8 @@ def high_sales_low_profit(df, sales_threshold=5000, profit_threshold=100):
 
     for _, row in filtered.iterrows():
         alerts.append(
-            f"⚠ High Sales–Low Profit → {row['Product']} | Sales: {row['Sales']} | Profit: {row['Profit']}"
+            f"High sales but low profit for {row['Product']} "
+            f"(Sales: {row['Sales']}, Profit: {row['Profit']})"
         )
     return alerts
 
@@ -31,14 +29,12 @@ def three_month_decline(df):
 
     for product, group in grouped.groupby("Product"):
         profits = group.sort_values("Month")["Profit"].values
-
         for i in range(len(profits) - 2):
             if profits[i] > profits[i + 1] > profits[i + 2]:
                 alerts.append(
-                    f"📉 {product} profit declined for 3 consecutive months"
+                    f"Profit declining for 3 months for product {product}"
                 )
-                break  # avoid duplicates
-
+                break
     return alerts
 
 
@@ -48,7 +44,8 @@ def risky_discount(df, profit_threshold=100, discount_threshold=0.15):
 
     for _, row in risky.iterrows():
         alerts.append(
-            f"⚠ High Discount Risk → {row['Product']} | Discount: {row['Discount']*100:.0f}% | Profit: {row['Profit']}"
+            f"High discount risk on {row['Product']} "
+            f"(Discount: {row['Discount']*100:.0f}%, Profit: {row['Profit']})"
         )
     return alerts
 
@@ -61,14 +58,12 @@ def region_risk(df):
 
     for region, group in grouped.groupby("Region"):
         profits = group.sort_values("Month")["Profit"].values
-
         for i in range(len(profits) - 2):
             if profits[i] > profits[i + 1] > profits[i + 2]:
                 alerts.append(
-                    f"🌍 Region Risk: {region} profit declining for 3 months"
+                    f"Profit declining for 3 months in region {region}"
                 )
                 break
-
     return alerts
 
 
@@ -83,11 +78,12 @@ def run_rule_engine(df):
     alerts.extend(risky_discount(df))
     alerts.extend(region_risk(df))
 
-    return list(set(alerts))  # remove duplicates
+    return list(set(alerts))
+
 
 def compute_kpis(df):
-    total_sales = df["Sales"].sum()
-    total_profit = df["Profit"].sum()
+    total_sales = float(df["Sales"].sum())
+    total_profit = float(df["Profit"].sum())
 
     top_products = (
         df.groupby("Product")["Profit"]
@@ -98,4 +94,3 @@ def compute_kpis(df):
     )
 
     return total_sales, total_profit, top_products
-
