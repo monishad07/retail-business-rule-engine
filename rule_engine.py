@@ -1,6 +1,8 @@
 
 
 import pandas as pd
+from ml_forecast import forecast_profit_ml
+
 
 REQUIRED_COLUMNS = {"Date", "Product", "Profit", "Sales", "Discount", "Region"}
 
@@ -165,6 +167,8 @@ def run_rule_engine(df, sales_threshold, profit_threshold, discount_threshold):
     alerts.extend(risky_discount(df, discount_threshold, profit_threshold))
     alerts.extend(region_risk(df))
     alerts.extend(forecast_decline_risk(df))
+    alerts.extend(forecast_profit_ml(df, profit_threshold))
+
 
     alerts = deduplicate_alerts(alerts)
     alerts = [add_recommendation(a) for a in alerts]
