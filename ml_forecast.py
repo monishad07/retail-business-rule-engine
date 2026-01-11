@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
 
-def forecast_profit_risk(df, profit_threshold):
+def forecast_profit_ml(df, profit_threshold):
     alerts = []
 
     df = df.copy()
