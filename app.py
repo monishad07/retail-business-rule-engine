@@ -65,15 +65,6 @@ if uploaded_file:
         (df["Product"].isin(selected_products))
     ]
 
-    # ---------- ALERT SEVERITY FILTER ----------
-    st.sidebar.subheader("Alert Severity")
-
-    selected_severity = st.sidebar.multiselect(
-       "Show Alerts With Severity",
-       options=["High", "Medium"],
-       default=["High", "Medium"]
-    )
-
 
     # ---------- KPIs ----------
     total_sales, total_profit, top_products = compute_kpis(filtered_df)
