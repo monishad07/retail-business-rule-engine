@@ -84,22 +84,22 @@ if uploaded_file:
 
     st.subheader("📊 Executive Summary")
 
-high_risk = sum(1 for a in alerts if a["severity"] == "High")
-medium_risk = sum(1 for a in alerts if a["severity"] == "Medium")
+    high_risk = sum(1 for a in alerts if a["severity"] == "High")
+    medium_risk = sum(1 for a in alerts if a["severity"] == "Medium")
 
-products_impacted = {
-    a["entity"] for a in alerts if a["group"] == "Product"
-}
+    products_impacted = {
+       a["entity"] for a in alerts if a["group"] == "Product"
+   }
 
-regions_impacted = {
-    a["entity"] for a in alerts if a["group"] == "Region"
-}
+    regions_impacted = {
+      a["entity"] for a in alerts if a["group"] == "Region"
+  }
 
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Total Alerts", len(alerts))
-c2.metric("High Risk", high_risk)
-c3.metric("Products Impacted", len(products_impacted))
-c4.metric("Regions Impacted", len(regions_impacted))
+   c1, c2, c3, c4 = st.columns(4)
+   c1.metric("Total Alerts", len(alerts))
+   c2.metric("High Risk", high_risk)
+   c3.metric("Products Impacted", len(products_impacted))
+   c4.metric("Regions Impacted", len(regions_impacted))
 
 
     # ---------- ALERTS ----------
