@@ -184,45 +184,44 @@ if uploaded_file:
 
     # ================= FORECAST =================
     with tab3:
-       st.markdown("<h2>Forecast Risk Assessment</h2>", unsafe_allow_html=True)
+        st.markdown("<h2>Forecast Risk Assessment</h2>", unsafe_allow_html=True)
 
-       ml_alerts, ml_forecasts = forecast_profit_risk(
-          filtered_df, profit_threshold
-       )
-
-      if ml_alerts:
-        for alert in ml_alerts:
-            st.markdown(f"""
-                <div class='metric-card' style='border-left:6px solid #38bdf8; text-align:left;'>
-                    <h3>{alert['entity']}</h3>
-                    <p>{alert['message']}</p>
-                    <p><strong>Severity:</strong> {alert['severity']}</p>
-                    <p><strong>Recommendation:</strong> {alert['recommendation']}</p>
-                </div>
-            """, unsafe_allow_html=True)
-     else:
-        st.info("No ML forecast risks detected")
-
-     st.markdown("<h2>ML Prediction with Confidence Bands</h2>", unsafe_allow_html=True)
-
-     for fc in ml_forecasts:
-        chart_df = pd.DataFrame({
-            "Month": fc["Months"] + ["Next Month"],
-            "Profit": fc["ActualProfit"] + [fc["PredictedProfit"]],
-            "Lower": fc["ActualProfit"] + [fc["LowerBound"]],
-            "Upper": fc["ActualProfit"] + [fc["UpperBound"]],
-        })
-
-        st.markdown(
-            f"<h4>{fc['Product']} — {fc['Region']}</h4>",
-            unsafe_allow_html=True
+        ml_alerts, ml_forecasts = forecast_profit_risk(
+            filtered_df, profit_threshold
         )
 
-        st.line_chart(
-            chart_df.set_index("Month")[["Profit", "Lower", "Upper"]],
-            use_container_width=True
-        )
+        if ml_alerts:
+            for alert in ml_alerts:
+                st.markdown(f"""
+                    <div class='metric-card' style='border-left:6px solid #38bdf8; text-align:left;'>
+                        <h3>{alert['entity']}</h3>
+                        <p>{alert['message']}</p>
+                        <p><strong>Severity:</strong> {alert['severity']}</p>
+                        <p><strong>Recommendation:</strong> {alert['recommendation']}</p>
+                    </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("No ML forecast risks detected")
 
+        st.markdown("<h2>ML Prediction with Confidence Bands</h2>", unsafe_allow_html=True)
+
+        for fc in ml_forecasts:
+            chart_df = pd.DataFrame({
+                "Month": fc["Months"] + ["Next Month"],
+                "Profit": fc["ActualProfit"] + [fc["PredictedProfit"]],
+                "Lower": fc["ActualProfit"] + [fc["LowerBound"]],
+                "Upper": fc["ActualProfit"] + [fc["UpperBound"]],
+            })
+
+            st.markdown(
+                f"<h4>{fc['Product']} — {fc['Region']}</h4>",
+                unsafe_allow_html=True
+            )
+
+            st.line_chart(
+                chart_df.set_index("Month")[["Profit", "Lower", "Upper"]],
+                use_container_width=True
+            )
 
     # ================= TRENDS =================
     with tab4:
