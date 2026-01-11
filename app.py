@@ -66,15 +66,18 @@ if uploaded_file:
     st.divider()
 
     # ---------- Alerts Section ----------
-    st.subheader("Business Risk Alerts")
+    st.subheader("🚨 Business Risk Alerts")
 
-    if alerts:
-        for alert in alerts:
-            st.warning(alert)
-    else:
-        st.success("No risks detected. Business performance looks healthy.")
-
-    st.divider()
+if alerts:
+    for alert in alerts:
+        if alert["severity"] == "High":
+            st.error(alert["message"])
+        elif alert["severity"] == "Medium":
+            st.warning(alert["message"])
+        else:
+            st.info(alert["message"])
+else:
+    st.success("No risks detected. Business performance looks healthy.")
 
     # ---------- Line Chart: Profit Trend ----------
     st.subheader("📈 Profit Trend Over Time")
