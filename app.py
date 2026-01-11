@@ -183,7 +183,7 @@ if uploaded_file:
             )
 
     # ================= FORECAST =================
-with tab3:
+    with tab3:
     st.markdown("<h2>Forecast Risk Assessment</h2>", unsafe_allow_html=True)
 
     ml_alerts, ml_forecasts = forecast_profit_risk(
