@@ -52,7 +52,7 @@ if uploaded_file:
         discount_threshold
     )
 
-    ml_alerts, ml_forecasts = forecast_profit_ml(filtered_df, profit_threshold)
+    ml_alerts, ml_forecasts = forecast_profit_risk(filtered_df, profit_threshold)
 
     all_alerts = rule_alerts + ml_alerts
 
