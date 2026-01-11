@@ -180,7 +180,20 @@ if uploaded_file:
                     <p>{alert['message']}</p>
                     <p><strong>Recommendation:</strong> {alert['recommendation']}</p>
                 </div>
-            """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)        # ---------- DOWNLOAD ALERTS ----------
+        if all_alerts:
+            st.markdown("<h3 style='margin-top:30px;'>Download Alerts</h3>", unsafe_allow_html=True)
+
+            alert_df = pd.DataFrame(all_alerts)
+
+            st.download_button(
+                label="Download Alerts CSV",
+                data=alert_df.to_csv(index=False),
+                file_name="retail_business_alerts.csv",
+                mime="text/csv"
+            )
+
+            
 
     # ================= FORECAST =================
     with tab3:
