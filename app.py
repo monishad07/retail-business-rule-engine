@@ -258,10 +258,7 @@ if uploaded_file:
             fill_value=0
         )
 
-        st.dataframe(
-            pivot.style.background_gradient(cmap="Reds"),
-            use_container_width=True
-        )
+        st.dataframe(pivot, use_container_width=True)
 
     st.divider()
 
