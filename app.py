@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 import pandas as pd
 from rule_engine import run_rule_engine, compute_kpis
@@ -14,9 +12,9 @@ st.set_page_config(
 st.sidebar.title("Controls")
 uploaded_file = st.sidebar.file_uploader("Upload Retail CSV", type=["csv"])
 
-# ------------------ MAIN TITLE ------------------
+# ------------------ HEADER ------------------
 st.title("Retail Business Rule Engine")
-st.caption("Upload a retail dataset to automatically detect business risks and insights")
+st.caption("Automated detection of business risks and predictive insights")
 
 # =================================================
 # MAIN LOGIC
@@ -65,146 +63,157 @@ if uploaded_file:
         (df["Product"].isin(selected_products))
     ]
 
-    # ---------- KPIs ----------
-    total_sales, total_profit, top_products = compute_kpis(filtered_df)
+    # =================================================
+    # 📊 KPI STRIP
+    # =================================================
+    with st.container():
+        total_sales, total_profit, top_products = compute_kpis(filtered_df)
 
-    all_alerts = run_rule_engine(
-        filtered_df,
-        sales_threshold,
-        profit_threshold,
-        discount_threshold
-    )
+        all_alerts = run_rule_engine(
+            filtered_df,
+            sales_threshold,
+            profit_threshold,
+            discount_threshold
+        )
 
-    # ---------- SPLIT FORECAST vs NORMAL ----------
-    forecast_alerts = [a for a in all_alerts if a["type"] == "FORECAST_PROFIT_RISK"]
-    alerts = [a for a in all_alerts if a["type"] != "FORECAST_PROFIT_RISK"]
+        forecast_alerts = [a for a in all_alerts if a["type"] == "FORECAST_PROFIT_RISK"]
+        alerts = [a for a in all_alerts if a["type"] != "FORECAST_PROFIT_RISK"]
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Total Sales", f"{total_sales:,.0f}")
-    col2.metric("Total Profit", f"{total_profit:,.0f}")
-    col3.metric("Total Alerts", len(all_alerts))
+        k1, k2, k3 = st.columns(3)
+        k1.metric("Total Sales", f"{total_sales:,.0f}")
+        k2.metric("Total Profit", f"{total_profit:,.0f}")
+        k3.metric("Total Alerts", len(all_alerts))
 
     st.divider()
 
-    # ---------- EXECUTIVE SUMMARY ----------
-    st.subheader("📊 Executive Summary")
+    # =================================================
+    # 📌 EXECUTIVE SNAPSHOT
+    # =================================================
+    with st.container():
+        st.subheader("📌 Executive Snapshot")
 
-    high_risk = sum(1 for a in alerts if a["severity"] == "High")
-    medium_risk = sum(1 for a in alerts if a["severity"] == "Medium")
+        high_risk = sum(1 for a in alerts if a["severity"] == "High")
+        medium_risk = sum(1 for a in alerts if a["severity"] == "Medium")
 
-    products_impacted = {a["entity"] for a in alerts if a["group"] == "Product"}
-    regions_impacted = {a["entity"] for a in alerts if a["group"] == "Region"}
+        products_impacted = {a["entity"] for a in alerts if a["group"] == "Product"}
+        regions_impacted = {a["entity"] for a in alerts if a["group"] == "Region"}
 
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Active Alerts", len(alerts))
-    c2.metric("High Risk", high_risk)
-    c3.metric("Products Impacted", len(products_impacted))
-    c4.metric("Regions Impacted", len(regions_impacted))
+        s1, s2, s3, s4 = st.columns(4)
+        s1.metric("Active Alerts", len(alerts))
+        s2.metric("High Risk", high_risk)
+        s3.metric("Products Impacted", len(products_impacted))
+        s4.metric("Regions Impacted", len(regions_impacted))
+
+    st.divider()
 
     # =================================================
-    # 🔥 NEW: SEVERITY HEATMAP (SAFE FOR STREAMLIT CLOUD)
+    # 🚨 RISK ZONE (TABS)
     # =================================================
-    if alerts:
-        st.divider()
-        st.subheader("🔥 Severity Heatmap (Risk Concentration)")
+    tab1, tab2, tab3 = st.tabs([
+        "🚨 Business Alerts",
+        "🔮 Forecast Warnings",
+        "🔥 Severity Heatmap"
+    ])
 
-        heatmap_df = pd.DataFrame(alerts)
-        heatmap_pivot = (
-            heatmap_df
-            .groupby(["group", "severity"])
-            .size()
-            .reset_index(name="Count")
-            .pivot(index="group", columns="severity", values="Count")
-            .fillna(0)
+    # ---------- TAB 1: BUSINESS ALERTS ----------
+    with tab1:
+        if alerts:
+            grouped = {}
+            for alert in alerts:
+                key = f"{alert['group']}: {alert['entity']}"
+                grouped.setdefault(key, []).append(alert)
+
+            for header, items in grouped.items():
+                st.markdown(f"### 🔹 {header}")
+                for alert in items:
+                    if alert["severity"] == "High":
+                        st.error(alert["message"])
+                    elif alert["severity"] == "Medium":
+                        st.warning(alert["message"])
+                    else:
+                        st.info(alert["message"])
+
+                    st.markdown(
+                        f"**🛠 Recommendation:** {alert.get('recommendation', 'Monitor closely')}"
+                    )
+        else:
+            st.success("No business risks detected.")
+
+    # ---------- TAB 2: FORECAST ----------
+    with tab2:
+        if forecast_alerts:
+            for alert in forecast_alerts:
+                st.markdown(
+                    f"""
+                    <div style="
+                        background-color:#fff4e6;
+                        padding:18px;
+                        border-left:6px solid #ff9800;
+                        border-radius:10px;
+                        margin-bottom:14px;
+                    ">
+                        <strong>{alert['group']}:</strong> {alert['entity']}<br>
+                        <span style="color:#e65100;">
+                            {alert['message']}
+                        </span><br>
+                        <strong>🛠 Recommendation:</strong> {alert.get('recommendation')}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+        else:
+            st.info("No forecast risks identified.")
+
+    # ---------- TAB 3: HEATMAP ----------
+    with tab3:
+        if alerts:
+            heatmap_df = pd.DataFrame(alerts)
+            pivot = (
+                heatmap_df
+                .groupby(["group", "severity"])
+                .size()
+                .reset_index(name="Count")
+                .pivot(index="group", columns="severity", values="Count")
+                .fillna(0)
+            )
+
+            st.dataframe(pivot, use_container_width=True)
+        else:
+            st.info("No risk data available.")
+
+    st.divider()
+
+    # =================================================
+    # 📈 PERFORMANCE TREND
+    # =================================================
+    with st.container():
+        st.subheader("📈 Profit Trend Over Time")
+
+        trend_df = (
+            filtered_df
+            .groupby(pd.to_datetime(filtered_df["Date"]).dt.to_period("M"))["Profit"]
+            .sum()
+            .reset_index()
         )
 
-        st.dataframe(heatmap_pivot, use_container_width=True)
+        trend_df["Date"] = trend_df["Date"].astype(str)
+        st.line_chart(trend_df, x="Date", y="Profit")
 
-    # ---------- BUSINESS ALERTS ----------
-    st.subheader("🚨 Business Risk Alerts")
+    st.divider()
 
-    if alerts:
-        grouped = {}
-        for alert in alerts:
-            key = f"{alert['group']}: {alert['entity']}"
-            grouped.setdefault(key, []).append(alert)
+    # =================================================
+    # 📥 DOWNLOAD
+    # =================================================
+    with st.container():
+        st.subheader("📥 Export Alerts")
 
-        for header, items in grouped.items():
-            st.markdown(f"### 🔹 {header}")
-            for alert in items:
-                if alert["severity"] == "High":
-                    st.error(alert["message"])
-                elif alert["severity"] == "Medium":
-                    st.warning(alert["message"])
-                else:
-                    st.info(alert["message"])
-
-                # =================================================
-                # 🛠️ NEW: ACTION RECOMMENDATION
-                # =================================================
-                if alert["type"] == "HIGH_SALES_LOW_PROFIT":
-                    st.markdown("**🛠 Recommendation:** Review cost structure and pricing strategy.")
-                elif alert["type"] == "DISCOUNT_RISK":
-                    st.markdown("**🛠 Recommendation:** Reduce discount or renegotiate supplier pricing.")
-                elif alert["type"] == "PRODUCT_PROFIT_DECLINE":
-                    st.markdown("**🛠 Recommendation:** Investigate declining demand or increase promotion.")
-                elif alert["type"] == "REGION_PROFIT_DECLINE":
-                    st.markdown("**🛠 Recommendation:** Analyze regional sales strategy and logistics.")
-
-        # ---------- DOWNLOAD ----------
         alert_df = pd.DataFrame(all_alerts)
         st.download_button(
-            "⬇️ Download Alerts CSV",
+            "Download Alerts CSV",
             data=alert_df.to_csv(index=False),
             file_name="retail_business_alerts.csv",
             mime="text/csv"
         )
-    else:
-        st.success("No risks detected. Business performance looks healthy.")
-
-    # ---------- FORECAST SECTION ----------
-    if forecast_alerts:
-        st.divider()
-        st.markdown("## 🔮 Forecast Risk Warnings")
-        st.caption("Predictive insights based on recent profit trends")
-
-        for alert in forecast_alerts:
-            st.markdown(
-                f"""
-                <div style="
-                    background-color:#fff4e6;
-                    padding:18px;
-                    border-left:6px solid #ff9800;
-                    border-radius:10px;
-                    margin-bottom:14px;
-                    box-shadow:0 4px 10px rgba(0,0,0,0.05);
-                ">
-                    <strong>{alert['group']}:</strong> {alert['entity']}<br>
-                    <span style="color:#e65100; font-size:16px;">
-                        {alert['message']}
-                    </span><br>
-                    <strong>🛠 Recommendation:</strong> Prepare corrective actions before next cycle.
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-    st.divider()
-
-    # ---------- TREND ----------
-    st.subheader("📈 Profit Trend Over Time")
-
-    trend_df = (
-        filtered_df
-        .groupby(pd.to_datetime(filtered_df["Date"]).dt.to_period("M"))["Profit"]
-        .sum()
-        .reset_index()
-    )
-
-    trend_df["Date"] = trend_df["Date"].astype(str)
-    st.line_chart(trend_df, x="Date", y="Profit")
 
 else:
     st.info("Please upload a retail CSV file to begin analysis.")
-
-
