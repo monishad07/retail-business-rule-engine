@@ -99,7 +99,7 @@ if uploaded_file:
     # ---------- THRESHOLDS ----------
     st.sidebar.subheader("Rule Thresholds")
     sales_threshold = st.sidebar.slider("High Sales Threshold", 1000, 20000, 5000, 500)
-    profit_threshold = st.sidebar.slider("Low Profit Threshold", 0, 500, 100, 10)
+    profit_threshold = st.sidebar.slider("Low Profit Threshold", 0, 2000, 100, 10)
     discount_threshold = st.sidebar.slider("High Discount Percentage", 0, 50, 15, 1) / 100
 
     if not selected_regions or not selected_products:
