@@ -236,5 +236,5 @@ with tab3:
         trend_df["Date"] = trend_df["Date"].astype(str)
         st.line_chart(trend_df, x="Date", y="Profit")
 
-else:
+   else:
     st.info("Upload a retail CSV file to begin analysis")
