@@ -168,8 +168,21 @@ if uploaded_file:
 
         if alerts:
             df_heat = pd.DataFrame(alerts)
-            pivot = df_heat.groupby(["group", "severity"]).size().unstack(fill_value=0)
-            st.dataframe(pivot, use_container_width=True)
+            pivot = (
+                 heatmap_df
+                .groupby(["group", "severity"])
+                .size()
+                .unstack(fill_value=0)
+        )
+
+       # Ensure both severities always exist
+      for sev in ["High", "Medium"]:
+       if sev not in pivot.columns:
+        pivot[sev] = 0
+
+      pivot = pivot[["High", "Medium"]]
+
+      st.dataframe(pivot, use_container_width=True)
 
         st.markdown("<h2>Business Risk Alerts</h2>", unsafe_allow_html=True)
         for alert in alerts:
