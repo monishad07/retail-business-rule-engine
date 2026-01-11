@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from rule_engine import run_rule_engine, compute_kpis
-from ml_forecast import forecast_profit_ml
+from ml_forecast import forecast_profit_risk
 
 # ------------------ PAGE CONFIG ------------------
 st.set_page_config(
