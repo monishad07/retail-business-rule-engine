@@ -1,50 +1,47 @@
+# ml_forecast.py
 import pandas as pd
+import numpy as np
 from sklearn.linear_model import LinearRegression
 
-def forecast_profit_ml(df, profit_threshold):
+def forecast_profit_risk(df, profit_threshold):
     alerts = []
 
     df = df.copy()
     df["Month"] = pd.to_datetime(df["Date"]).dt.to_period("M")
 
-    monthly = (
-        df.groupby(["Product", "Month"])["Profit"]
+    grouped = (
+        df.groupby(["Product", "Region", "Month"])["Profit"]
         .sum()
         .reset_index()
     )
 
-    for product, group in monthly.groupby("Product"):
+    for (product, region), data in grouped.groupby(["Product", "Region"]):
+        data = data.sort_values("Month")
 
-        if len(group) < 4:
-            continue  # not enough history
+        # Need at least 3 months for ML
+        if len(data) < 3:
+            continue
 
-        group = group.sort_values("Month")
-        group["month_index"] = range(len(group))
-
-        X = group[["month_index"]]
-        y = group["Profit"]
+        X = np.arange(len(data)).reshape(-1, 1)
+        y = data["Profit"].values
 
         model = LinearRegression()
         model.fit(X, y)
 
-        next_month_index = [[group["month_index"].max() + 1]]
+        next_month_index = np.array([[len(data)]])
         predicted_profit = model.predict(next_month_index)[0]
 
         if predicted_profit < profit_threshold:
             alerts.append({
-                "type": "ML_FORECAST_PROFIT_RISK",
+                "type": "FORECAST_PROFIT_RISK",
                 "group": "Product",
-                "entity": product,
+                "entity": f"{product} ({region})",
+                "severity": "Medium" if predicted_profit > 0 else "High",
                 "message": (
-                    f"ML forecast predicts low profit next month "
-                    f"({predicted_profit:.2f})"
+                    f"ML forecast predicts next month profit "
+                    f"{predicted_profit:.0f}, below threshold {profit_threshold}"
                 ),
-                "severity": "High",
-                "recommendation": (
-                    "Review pricing, cost structure, and promotions "
-                    "based on ML forecast."
-                )
+                "recommendation": "Review pricing, discounts, and demand drivers"
             })
 
     return alerts
-
