@@ -22,39 +22,27 @@ if dark_mode:
                 color: #e5e7eb;
                 font-family: 'Segoe UI', sans-serif;
             }
-
-            h1, h2, h3, h4 {
-                color: #f1f5f9;
-            }
-
-            p, span, label {
-                color: #d1d5db;
-            }
-
+            h1, h2, h3, h4 { color: #f1f5f9; }
+            p, span, label { color: #d1d5db; }
             section[data-testid="stSidebar"] {
                 background-color: #111827;
-                color: #e5e7eb;
             }
-
             .metric-card {
                 background: #242a38;
                 padding: 26px;
                 border-radius: 16px;
                 box-shadow: 0 8px 20px rgba(0,0,0,0.6);
             }
-
             div[data-baseweb="tab"] {
                 font-size: 18px;
                 color: #9ca3af;
             }
-
             div[data-baseweb="tab"][aria-selected="true"] {
                 color: #38bdf8 !important;
                 font-weight: 700;
             }
         </style>
     """, unsafe_allow_html=True)
-
 else:
     st.markdown("""
         <style>
@@ -63,32 +51,21 @@ else:
                 color: #1f2933;
                 font-family: 'Segoe UI', sans-serif;
             }
-
-            h1, h2, h3, h4 {
-                color: #0f172a;
-            }
-
-            p, span, label {
-                color: #334155;
-            }
-
+            h1, h2, h3, h4 { color: #0f172a; }
+            p, span, label { color: #334155; }
             section[data-testid="stSidebar"] {
                 background-color: #e2e8f0;
-                color: #0f172a;
             }
-
             .metric-card {
                 background: #ffffff;
                 padding: 26px;
                 border-radius: 16px;
                 box-shadow: 0 10px 24px rgba(0,0,0,0.08);
             }
-
             div[data-baseweb="tab"] {
                 font-size: 18px;
                 color: #475569;
             }
-
             div[data-baseweb="tab"][aria-selected="true"] {
                 color: #0284c7 !important;
                 font-weight: 700;
@@ -168,21 +145,20 @@ if uploaded_file:
 
         if alerts:
             df_heat = pd.DataFrame(alerts)
+
             pivot = (
-                 heatmap_df
+                df_heat
                 .groupby(["group", "severity"])
                 .size()
                 .unstack(fill_value=0)
-        )
+            )
 
-       # Ensure both severities always exist
-      for sev in ["High", "Medium"]:
-       if sev not in pivot.columns:
-        pivot[sev] = 0
+            for sev in ["High", "Medium"]:
+                if sev not in pivot.columns:
+                    pivot[sev] = 0
 
-      pivot = pivot[["High", "Medium"]]
-
-      st.dataframe(pivot, use_container_width=True)
+            pivot = pivot[["High", "Medium"]]
+            st.dataframe(pivot, use_container_width=True)
 
         st.markdown("<h2>Business Risk Alerts</h2>", unsafe_allow_html=True)
         for alert in alerts:
@@ -193,20 +169,17 @@ if uploaded_file:
                     <p>{alert['message']}</p>
                     <p><strong>Recommendation:</strong> {alert['recommendation']}</p>
                 </div>
-            """, unsafe_allow_html=True)        # ---------- DOWNLOAD ALERTS ----------
+            """, unsafe_allow_html=True)
+
         if all_alerts:
             st.markdown("<h3 style='margin-top:30px;'>Download Alerts</h3>", unsafe_allow_html=True)
-
             alert_df = pd.DataFrame(all_alerts)
-
             st.download_button(
                 label="Download Alerts CSV",
                 data=alert_df.to_csv(index=False),
                 file_name="retail_business_alerts.csv",
                 mime="text/csv"
             )
-
-            
 
     # ================= FORECAST =================
     with tab3:
