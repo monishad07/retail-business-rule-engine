@@ -144,6 +144,12 @@ if uploaded_file:
     with tab2:
         st.markdown("<h2>Risk Severity Overview</h2>", unsafe_allow_html=True)
 
+        st.markdown(
+           "<h3 style='margin-top:10px;'>Rule-Based Risk Alerts</h3>",
+           unsafe_allow_html=True
+        )
+
+
         if alerts:
             df_heat = pd.DataFrame(alerts)
 
