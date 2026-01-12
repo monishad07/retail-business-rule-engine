@@ -192,6 +192,12 @@ if uploaded_file:
     with tab3:
         st.markdown("<h2>Forecast Risk Assessment</h2>", unsafe_allow_html=True)
 
+        st.markdown(
+           "<h3 style='margin-top:10px;'>ML-Based Forecast Risk Alerts</h3>",
+           unsafe_allow_html=True
+        )
+
+
         ml_alerts, ml_forecasts = forecast_profit_risk(
             filtered_df, profit_threshold
         )
